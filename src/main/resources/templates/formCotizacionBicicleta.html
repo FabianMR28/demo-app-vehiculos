@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cotización de Bicicleta</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+          <link rel="stylesheet" th:href="@{/css/estilos.css}">
+  
+</head>
+<body class="bg-light">
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">🚗 AutoTech</a>
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container mt-5">
+  <div class="card shadow-lg p-4">
+    <h2 class="text-center mb-4">🚲 Cotización de Bicicleta</h2>
+
+    <div class="mb-3">
+      <h4>Bicicleta seleccionada:</h4>
+      <p><strong>Marca:</strong> <span th:text="${cotizacion.bicicleta.marca}">Marca</span></p>
+      <p><strong>Modelo:</strong> <span th:text="${cotizacion.bicicleta.modelo}">Modelo</span></p>
+      <p><strong>Precio:</strong> S/. <span th:text="${cotizacion.bicicleta.precio}">0.00</span></p>
+    </div>
+
+    <div class="mb-3">
+      <h4>Datos del usuario:</h4>
+      <p><strong>Nombre:</strong> <span th:text="${cotizacion.usuario.nombre}">Nombre</span></p>
+      <p><strong>Correo:</strong> <span th:text="${cotizacion.usuario.email}">correo@ejemplo.com</span></p>
+    </div>
+
+    <form th:action="@{/cotizaciones-bicicleta}" th:object="${cotizacion}" method="post">
+      <input type="hidden" th:field="*{bicicleta.id}" />
+      <input type="hidden" th:field="*{usuario.id}" />
+    </form>
+
+    <!-- Botón opcional para probar modal localmente sin enviar el formulario -->
+    <button type="submit" class="btn btn-success mt-2 w-100" data-bs-toggle="modal" data-bs-target="#compraModal">
+      Comprar Bicicleta
+    </button>
+  </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="compraModal" tabindex="-1" aria-labelledby="compraModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="compraModalLabel">✅ Compra Exitosa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        ¡Has comprado la bicicleta con éxito! Gracias por tu compra 🚲.
+      </div>
+      <div class="modal-footer">
+        <a th:href="@{/reportes/boleta}" class="btn btn-primary">
+          Descargar Boleta PDF
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
