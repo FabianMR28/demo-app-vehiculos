@@ -6,7 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -22,25 +22,40 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String rol = usuario.getRol() != null ? usuario.getRol() : "CLIENTE";
-        return List.of(new SimpleGrantedAuthority("ROLE_" + rol));
+        // Normaliza el rol del usuario (por ejemplo: "ADMINISTRADOR" o "CLIENTE")
+        String rol = usuario.getRol() != null ? usuario.getRol().trim().toUpperCase() : "CLIENTE";
+
+        // Spring Security requiere el prefijo "ROLE_" para reconocer los roles
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + rol));
     }
 
     @Override
-    public String getPassword() { return usuario.getPassword(); }
+    public String getPassword() {
+        return usuario.getPassword();
+    }
 
     @Override
-    public String getUsername() { return usuario.getEmail(); }
+    public String getUsername() {
+        return usuario.getEmail();
+    }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return true;
+    }
 }

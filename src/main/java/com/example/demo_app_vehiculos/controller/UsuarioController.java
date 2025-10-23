@@ -30,9 +30,13 @@ public class UsuarioController {
 
     @PostMapping
     public String guardar(@ModelAttribute Usuario usuario) {
+        // Asignar rol por defecto
+        usuario.setRol("CLIENTE");
+
         usuarioService.guardar(usuario);
         return "redirect:/login";
     }
+
 
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id) {
