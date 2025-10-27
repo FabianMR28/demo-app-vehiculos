@@ -2,22 +2,26 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${bicicleta.id != null} ? 'Editar Bicicelta' : 'Registrar Bicicleta'">Formulario Bicicleta</title>
+    <title th:text="${bicicleta != null and bicicleta.id != null} ? 'Editar Bicicleta' : 'Registrar Bicicleta'">
+        Formulario Bicicleta
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
 </head>
-<body>
+<body class="bg-light">
 <div class="container mt-5">
-    <h2 class="text-center mb-4" 
-        th:text="${bicicleta.id != null} ? 'Editar Bicicleta' : 'Registrar Nuevo Bicicleta'"></h2>
+    <h2 class="text-center mb-4"
+        th:text="${bicicleta != null and bicicleta.id != null} ? 'Editar Bicicleta' : 'Registrar Nueva Bicicleta'">
+        Formulario Bicicleta
+    </h2>
 
-    <form th:action="@{/adminBicicletas/guardar}" 
-          th:object="${bicicleta}" 
-          method="post" 
+    <form th:action="@{/adminBicicletas/guardar}"
+          th:object="${bicicleta}"
+          method="post"
           class="card p-4 shadow-sm">
 
         <!-- ID oculto (solo cuando se edita) -->
-        <input type="hidden" th:if="${bicicleta.id != null}" th:field="*{id}" />
+        <input type="hidden" th:if="${bicicleta != null and bicicleta.id != null}" th:field="*{id}" />
 
         <div class="mb-3">
             <label class="form-label">Marca:</label>
@@ -45,5 +49,7 @@
         </div>
     </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
