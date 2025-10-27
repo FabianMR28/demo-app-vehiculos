@@ -1,6 +1,7 @@
 package com.example.demo_app_vehiculos.service;
 
 import com.example.demo_app_vehiculos.model.SolicitudPesaje;
+import com.example.demo_app_vehiculos.model.Usuario;
 import com.example.demo_app_vehiculos.repository.SolicitudPesajeRepository;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,10 @@ public class BalanzaService {
 
     public void eliminar(Long id) {
         solicitudPesajeRepository.deleteById(id);
+    }
+    
+    public List<SolicitudPesaje> listarPorUsuario(Usuario usuario) {
+        return solicitudPesajeRepository.findByUsuario(usuario);
     }
 }
 

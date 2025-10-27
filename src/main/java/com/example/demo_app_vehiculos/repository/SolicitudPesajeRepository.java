@@ -2,6 +2,8 @@ package com.example.demo_app_vehiculos.repository;
 
 import com.example.demo_app_vehiculos.dto.ReportePesajeDTO;
 import com.example.demo_app_vehiculos.model.SolicitudPesaje;
+import com.example.demo_app_vehiculos.model.Usuario;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -15,4 +17,7 @@ public interface SolicitudPesajeRepository extends JpaRepository<SolicitudPesaje
            "s.placaVehiculo, s.tipoVehiculo, s.observaciones, s.pesoTotal, s.usuario.nombre, s.fechaRegistro) " +
            "FROM SolicitudPesaje s")
     List<ReportePesajeDTO> generarReportePesajeDTO();
+    
+    List<SolicitudPesaje> findByUsuario(Usuario usuario);
+	
 }

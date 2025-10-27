@@ -1,7 +1,11 @@
 package com.example.demo_app_vehiculos.controller;
 
 import com.example.demo_app_vehiculos.model.SolicitudPesaje;
+import com.example.demo_app_vehiculos.model.Usuario;
 import com.example.demo_app_vehiculos.service.BalanzaService;
+import com.example.demo_app_vehiculos.service.UsuarioService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,46 +17,51 @@ import java.time.LocalDateTime;
 public class BalanzaController {
 
     private final BalanzaService balanzaService;
+    private final UsuarioService usuarioService;
 
-    public BalanzaController(BalanzaService balanzaService) {
+    public BalanzaController(BalanzaService balanzaService, UsuarioService usuarioService) {
         this.balanzaService = balanzaService;
+        this.usuarioService = usuarioService;
     }
 
-    // Listar solicitudes
-    @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("solicitudes", balanzaService.listarSolicitudes());
-        return "balanzas"; // templates/balanzas.html
-    }
-
-    // Mostrar formulario
+    // 🧩 Mostrar formulario + listar solo solicitudes del usuario logueado
     @GetMapping("/nueva")
-    public String formulario(Model model) {
+    public String mostrarFormulario(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        Usuario usuario = usuarioService.buscarPorEmail(username).orElse(null);
+
         model.addAttribute("solicitud", new SolicitudPesaje());
-        return "formBalanza"; // templates/formBalanza.html
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("solicitudes", balanzaService.listarPorUsuario(usuario));
+
+        return "formBalanza";
     }
 
-    // Guardar nueva solicitud
+    // 🧾 Guardar nueva solicitud de pesaje (asociando al usuario logueado)
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute("solicitud") SolicitudPesaje solicitud, 
-                          Model model) {
-        solicitud.setFechaRegistro(LocalDateTime.now()); // fecha automática
-        balanzaService.guardar(solicitud); // guarda en BD
+    public String guardar(@ModelAttribute("solicitud") SolicitudPesaje solicitud,
+                          @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        Usuario usuario = usuarioService.buscarPorEmail(username).orElse(null);
 
-        // Prepara un objeto vacío para no romper el form
-        model.addAttribute("solicitud", new SolicitudPesaje());
+        solicitud.setUsuario(usuario);
+        solicitud.setFechaRegistro(LocalDateTime.now());
+        balanzaService.guardar(solicitud);
 
-        // Flag para mostrar modal en la vista
-        model.addAttribute("mostrarModal", true);
-
-        return "formBalanza"; 
-        // renderiza el formulario nuevamente y activa el modal
+        return "redirect:/balanzas/nueva";
     }
 
-    // Eliminar solicitud
+    // ❌ Eliminar solicitud (solo si pertenece al usuario actual)
     @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
-        balanzaService.eliminar(id);
-        return "redirect:/balanzas";
+    public String eliminar(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        Usuario usuario = usuarioService.buscarPorEmail(username).orElse(null);
+
+        SolicitudPesaje solicitud = balanzaService.buscarPorId(id).orElse(null);
+        if (solicitud.getUsuario().getId().equals(usuario.getId())) {
+            balanzaService.eliminar(id);
+        }
+
+        return "redirect:/balanzas/nueva";
     }
 }
