@@ -18,8 +18,8 @@
         </button>
         <div class="collapse navbar-collapse" id="menuNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link active" th:href="@{/autos}">Vehículos</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/bicicletas}">Bicicletas</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/autos}">Vehículos</a></li>
+                <li class="nav-item"><a class="nav-link active" th:href="@{/bicicletas}">Bicicletas</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/balanzas/nueva}">Pesaje de Vehículos</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/soportes/nueva}">Soporte Técnico</a></li>
                 <li class="nav-item">
@@ -61,8 +61,19 @@
 
 <!-- Lista de Bicicletas -->
 <section class="container my-5">
-    <h2 class="mb-4 text-center">Nuestras Bicicletas</h2>
 
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="m-0">Nuestras Bicicletas</h2>
+
+        <!-- Botón solo visible para administradores -->
+		<div th:if="${usuarioLogeado != null and usuarioLogeado.rol == 'ADMINISTRADOR'}" class="text-center mb-4">
+		    <a th:href="@{/adminBicicletas}" class="btn btn-primary">
+		        <i class="bi bi-gear"></i> Administrar Bicicletas
+		    </a>
+		</div>
+
+    </div>
+    
     <div class="row">
         <div class="col-md-4 mb-4" th:each="bicicleta : ${bicicletas}">
             <div class="card shadow-sm h-100">
