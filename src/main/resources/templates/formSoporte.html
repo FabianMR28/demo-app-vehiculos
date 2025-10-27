@@ -2,14 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Nueva Solicitud de Soporte</title>
+    <title>Soporte Técnico</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+
 </head>
 <body>
 
-<!-- Navbar -->
-<!-- NAVBAR -->
+<!-- Navbar (igual que antes) -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" th:href="@{/}">🚗 AutoTech</a>
@@ -62,31 +62,49 @@
 <div class="container mt-5">
     <h2 class="mb-4 text-center text-danger">Registrar Nueva Solicitud de Soporte</h2>
 
-    <form th:action="@{/soportes/guardar}" th:object="${soporte}" method="post" class="card p-4 shadow-sm">
-        <!-- Asunto -->
+    <!-- Formulario -->
+    <form th:action="@{/soportes/guardar}" th:object="${soporte}" method="post" class="card p-4 shadow-sm mb-5">
         <div class="mb-3">
             <label for="asunto" class="form-label">Asunto</label>
             <input type="text" id="asunto" th:field="*{asunto}" class="form-control" required>
         </div>
 
-        <!-- Descripción -->
         <div class="mb-3">
             <label for="descripcion" class="form-label">Descripción</label>
             <textarea id="descripcion" th:field="*{descripcion}" class="form-control" rows="4" required></textarea>
         </div>
 
-        <!-- Usuario -->
-        <div class="mb-3">
-            <label for="usuario" class="form-label">ID Usuario</label>
-            <input type="number" id="usuario" th:field="*{usuario.id}" class="form-control" placeholder="Ingrese ID del usuario">
-        </div>
-
-        <!-- Botones -->
         <div class="d-flex justify-content-between">
             <a th:href="@{/}" class="btn btn-secondary">Cancelar</a>
             <button type="submit" class="btn btn-primary">Guardar Solicitud</button>
         </div>
     </form>
+
+    <!-- Tabla de solicitudes del usuario -->
+    <h4 class="text-center text-primary mb-3">Mis Solicitudes de Soporte</h4>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Asunto</th>
+                    <th>Descripción</th>
+                    <th>Fecha Registro</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="s, iterStat : ${solicitudesUsuario}">
+                    <td th:text="${iterStat.count}">1</td>
+                    <td th:text="${s.asunto}">Problema con auto</td>
+                    <td th:text="${s.descripcion}">Descripción</td>
+                    <td th:text="${#temporals.format(s.fechaRegistro, 'dd/MM/yyyy HH:mm')}">fecha</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(solicitudesUsuario)}">
+                    <td colspan="5" class="text-muted">No tienes solicitudes registradas.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Modal de éxito -->
@@ -101,7 +119,7 @@
         Tu solicitud de soporte ha sido registrada correctamente.
       </div>
       <div class="modal-footer border-0">
-        <a th:href="@{/}" class="btn btn-success">OK</a>
+        <a th:href="@{/soportes/nueva}" class="btn btn-success">OK</a>
       </div>
     </div>
   </div>
@@ -109,12 +127,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
-    /* Si mostrarModal es true desde el controller, abre el modal */
     let mostrar = /*[[${mostrarModal}]]*/ false;
     if (mostrar) {
         let modal = new bootstrap.Modal(document.getElementById('successModal'));
         modal.show();
     }
 </script>
+
 </body>
 </html>

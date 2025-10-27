@@ -1,6 +1,7 @@
 package com.example.demo_app_vehiculos.service;
 
 import com.example.demo_app_vehiculos.model.SolicitudSoporte;
+import com.example.demo_app_vehiculos.model.Usuario;
 import com.example.demo_app_vehiculos.repository.SolicitudSoporteRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +20,19 @@ public class SoporteService {
         return soporteRepository.findAll();
     }
 
-    public void guardar(SolicitudSoporte solicitud) {
-        soporteRepository.save(solicitud);
+    public SolicitudSoporte guardar(SolicitudSoporte soporte) {
+        return soporteRepository.save(soporte);
     }
 
     public void eliminar(Long id) {
         soporteRepository.deleteById(id);
+    }
+    
+    public SolicitudSoporte obtenerPorId(Long id) {
+        return soporteRepository.findById(id).orElse(null);
+    }
+    
+    public List<SolicitudSoporte> listarPorUsuario(Usuario usuario) {
+        return soporteRepository.findByUsuario(usuario);
     }
 }
