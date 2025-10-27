@@ -9,6 +9,7 @@ import com.example.demo_app_vehiculos.service.UsuarioService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/cotizaciones-bicicleta")
@@ -29,7 +30,7 @@ public class CotizacionBicicletaController {
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("cotizaciones", cotizacionBicicletaService.listar());
-        return "cotizacionesBicicleta";
+        return "formCotizacionBicicleta";
     }
 
     @GetMapping("/nueva")
@@ -46,8 +47,14 @@ public class CotizacionBicicletaController {
     }
 
     @PostMapping
-    public String guardar(@ModelAttribute CotizacionBicicleta cotizacion) {
-        cotizacionBicicletaService.guardar(cotizacion);
-        return "redirect:/cotizaciones-bicicleta?exito";
+    public String guardar(@ModelAttribute CotizacionBicicleta cotizacion, RedirectAttributes redirectAttributes) {
+        CotizacionBicicleta guardada = cotizacionBicicletaService.guardar(cotizacion);
+
+        // redirige a la misma vista pero con parámetros para mostrar el modal
+        redirectAttributes.addAttribute("exito", true);
+        redirectAttributes.addAttribute("idCotizacion", guardada.getId());
+
+        return "redirect:/cotizaciones-bicicleta/nueva?idBicicleta=" + cotizacion.getBicicleta().getId();
     }
+
 }
