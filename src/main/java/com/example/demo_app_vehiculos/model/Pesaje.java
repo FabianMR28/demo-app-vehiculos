@@ -1,32 +1,31 @@
-package com.example.demo_app_vehiculos.dto;
+package com.example.demo_app_vehiculos.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-public class ReportePesajeDTO {
+@Entity
+@Table(name = "pesajes")
+public class Pesaje {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String placaVehiculo;
     private String tipoVehiculo;
     private String observaciones;
-    private Double pesoTotal;
-    private String nombreUsuario;
+    private Double pesoTotal; // Este será el que registre el usuario
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario; // Usuario que registra el peso
+
     private LocalDateTime fechaRegistro;
 
-    
-    public ReportePesajeDTO() {}
+    // Getters y setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    
-    // ⚠️ Constructor que coincide EXACTAMENTE con el @Query
-    public ReportePesajeDTO(String placaVehiculo, String tipoVehiculo, String observaciones,
-                            Double pesoTotal, String nombreUsuario, LocalDateTime fechaRegistro) {
-        this.placaVehiculo = placaVehiculo;
-        this.tipoVehiculo = tipoVehiculo;
-        this.observaciones = observaciones;
-        this.pesoTotal = pesoTotal;
-        this.nombreUsuario = nombreUsuario;
-        this.fechaRegistro = fechaRegistro;
-    }
-
-    // ----- Getters & Setters -----
     public String getPlacaVehiculo() { return placaVehiculo; }
     public void setPlacaVehiculo(String placaVehiculo) { this.placaVehiculo = placaVehiculo; }
 
@@ -39,8 +38,8 @@ public class ReportePesajeDTO {
     public Double getPesoTotal() { return pesoTotal; }
     public void setPesoTotal(Double pesoTotal) { this.pesoTotal = pesoTotal; }
 
-    public String getNombreUsuario() { return nombreUsuario; }
-    public void setNombreUsuario(String nombreUsuario) { this.nombreUsuario = nombreUsuario; }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
     public LocalDateTime getFechaRegistro() { return fechaRegistro; }
     public void setFechaRegistro(LocalDateTime fechaRegistro) { this.fechaRegistro = fechaRegistro; }

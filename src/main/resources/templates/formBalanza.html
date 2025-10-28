@@ -61,6 +61,14 @@
 <div class="container mt-5">
     <h2 class="mb-4 text-center text-primary">Registrar Nueva Solicitud de Pesaje</h2>
 
+    <!-- Botón solo visible para administradores -->
+		<div th:if="${usuarioLogeado != null and usuarioLogeado.rol == 'ADMINISTRADOR'}" class="text-center mb-4">
+		    <a th:href="@{/balanzas/adminSolicitudesPesaje}" class="btn btn-primary">
+		        <i class="bi bi-gear"></i> Administrar Solicitudes de Pesaje
+		    </a>
+		</div>
+
+
     <!-- ✅ Formulario -->
     <form th:action="@{/balanzas/guardar}" th:object="${solicitud}" method="post" class="card p-4 shadow-sm">
 
@@ -121,7 +129,6 @@
                 <td th:text="${solicitud.tipoVehiculo}"></td>
                 <td th:text="${#temporals.format(solicitud.fechaRegistro, 'dd/MM/yyyy HH:mm')}"></td>
                 <td th:text="${solicitud.observaciones}"></td>
-
             </tr>
             <tr th:if="${#lists.isEmpty(solicitudes)}">
                 <td colspan="6" class="text-muted">No tienes solicitudes registradas.</td>
@@ -130,6 +137,7 @@
         </table>
     </div>
 </div>
+
 
 <!-- Modal de éxito -->
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">

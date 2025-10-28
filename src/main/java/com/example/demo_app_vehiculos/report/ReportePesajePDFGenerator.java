@@ -1,74 +1,92 @@
 package com.example.demo_app_vehiculos.report;
 
-import com.example.demo_app_vehiculos.model.SolicitudPesaje;
-import com.example.demo_app_vehiculos.repository.SolicitudPesajeRepository;
+import com.example.demo_app_vehiculos.dto.ReportePesajeDTO;
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import org.springframework.stereotype.Component;
+import com.itextpdf.text.pdf.*;
 
 import java.io.OutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 @Component
 public class ReportePesajePDFGenerator {
 
-    private final SolicitudPesajeRepository solicitudPesajeRepository;
+    private static final Font TITULO = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD, BaseColor.BLUE);
+    private static final Font SUBTITULO = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.BLACK);
+    private static final Font TEXTO = new Font(Font.FontFamily.HELVETICA, 11, Font.NORMAL, BaseColor.DARK_GRAY);
 
-    public ReportePesajePDFGenerator(SolicitudPesajeRepository solicitudPesajeRepository) {
-        this.solicitudPesajeRepository = solicitudPesajeRepository;
+    public void generarReportePesaje(OutputStream outputStream, List<ReportePesajeDTO> registros) throws DocumentException {
+        Document document = new Document(PageSize.A4, 36, 36, 72, 36);
+        PdfWriter.getInstance(document, outputStream);
+
+        document.open();
+
+        // Título
+        Paragraph titulo = new Paragraph("Reporte de Pesaje de Vehículos", TITULO);
+        titulo.setAlignment(Element.ALIGN_CENTER);
+        titulo.setSpacingAfter(20);
+        document.add(titulo);
+
+        // Fecha de generación
+        Paragraph fecha = new Paragraph(
+                "Fecha de generación: " + java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                TEXTO
+        );
+        fecha.setAlignment(Element.ALIGN_RIGHT);
+        fecha.setSpacingAfter(10);
+        document.add(fecha);
+
+        // Tabla
+        PdfPTable tabla = new PdfPTable(6);
+        tabla.setWidthPercentage(100);
+        tabla.setSpacingBefore(10f);
+        tabla.setSpacingAfter(10f);
+        tabla.setWidths(new float[]{2f, 2f, 3f, 2f, 2f, 3f});
+
+        // Encabezado
+        addCellEncabezado(tabla, "Placa");
+        addCellEncabezado(tabla, "Tipo");
+        addCellEncabezado(tabla, "Observaciones");
+        addCellEncabezado(tabla, "Peso Total (kg)");
+        addCellEncabezado(tabla, "Usuario");
+        addCellEncabezado(tabla, "Fecha Registro");
+
+        // Filas
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        for (ReportePesajeDTO r : registros) {
+            addCellTexto(tabla, r.getPlacaVehiculo());
+            addCellTexto(tabla, r.getTipoVehiculo());
+            addCellTexto(tabla, r.getObservaciones());
+            addCellTexto(tabla, r.getPesoTotal() != null ? String.format("%.2f", r.getPesoTotal()) : "-");
+            addCellTexto(tabla, r.getNombreUsuario());
+            addCellTexto(tabla, r.getFechaRegistro() != null ? r.getFechaRegistro().format(formatter) : "-");
+        }
+
+        document.add(tabla);
+
+        // Pie de página
+        Paragraph footer = new Paragraph("© AutoTech - Sistema de Gestión de Pesaje", TEXTO);
+        footer.setAlignment(Element.ALIGN_CENTER);
+        footer.setSpacingBefore(30);
+        document.add(footer);
+
+        document.close();
     }
 
-    public void generarReportePesaje(OutputStream outputStream) {
-        try {
-            Document document = new Document(PageSize.A4.rotate());
-            PdfWriter.getInstance(document, outputStream);
-            document.open();
+    private void addCellEncabezado(PdfPTable table, String texto) {
+        PdfPCell cell = new PdfPCell(new Phrase(texto, SUBTITULO));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        cell.setPadding(5);
+        table.addCell(cell);
+    }
 
-            // 🔹 Título
-            Font tituloFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD, BaseColor.BLACK);
-            Paragraph titulo = new Paragraph("Reporte de Solicitudes de Pesaje", tituloFont);
-            titulo.setAlignment(Element.ALIGN_CENTER);
-            document.add(titulo);
-
-            document.add(new Paragraph(" "));
-            document.add(new Paragraph("Fecha de generación: " +
-                    java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
-            document.add(new Paragraph(" "));
-
-            // 🔹 Tabla de pesajes
-            PdfPTable table = new PdfPTable(6);
-            table.setWidthPercentage(100);
-            table.setSpacingBefore(10f);
-            table.setSpacingAfter(10f);
-
-            String[] headers = {"ID", "Placa", "Tipo Vehículo", "Peso Total", "Observaciones", "Usuario"};
-            for (String header : headers) {
-                PdfPCell cell = new PdfPCell(new Phrase(header, new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD)));
-                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-                table.addCell(cell);
-            }
-
-            List<SolicitudPesaje> solicitudes = solicitudPesajeRepository.findAll();
-            for (SolicitudPesaje s : solicitudes) {
-                table.addCell(String.valueOf(s.getId()));
-                table.addCell(s.getPlacaVehiculo());
-                table.addCell(s.getTipoVehiculo());
-                table.addCell(s.getPesoTotal() != null ? s.getPesoTotal().toString() : "-");
-                table.addCell(s.getObservaciones() != null ? s.getObservaciones() : "-");
-                table.addCell(s.getUsuario() != null ? s.getUsuario().getNombre() : "-");
-            }
-
-            document.add(table);
-
-            document.add(new Paragraph("Fin del reporte de pesajes.", new Font(Font.FontFamily.HELVETICA, 12, Font.ITALIC)));
-
-            document.close();
-        } catch (Exception e) {
-            throw new RuntimeException("Error generando reporte de pesaje PDF", e);
-        }
+    private void addCellTexto(PdfPTable table, String texto) {
+        PdfPCell cell = new PdfPCell(new Phrase(texto, TEXTO));
+        cell.setPadding(5);
+        table.addCell(cell);
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import java.time.LocalDateTime;
 
@@ -27,15 +28,22 @@ public class BalanzaController {
     // 🧩 Mostrar formulario + listar solo solicitudes del usuario logueado
     @GetMapping("/nueva")
     public String mostrarFormulario(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        // Obtener usuario logueado
         String username = userDetails.getUsername();
         Usuario usuario = usuarioService.buscarPorEmail(username).orElse(null);
 
+        // Agregar objeto para el formulario
         model.addAttribute("solicitud", new SolicitudPesaje());
-        model.addAttribute("usuario", usuario);
+
+        // ⚠️ Agregar usuario logueado al modelo para que el botón se muestre solo a ADMIN
+        model.addAttribute("usuarioLogeado", usuario);
+
+        // Agregar lista de solicitudes del usuario
         model.addAttribute("solicitudes", balanzaService.listarPorUsuario(usuario));
 
-        return "formBalanza";
+        return "formBalanza"; // tu template
     }
+
 
     // 🧾 Guardar nueva solicitud de pesaje (asociando al usuario logueado)
     @PostMapping("/guardar")
@@ -64,4 +72,15 @@ public class BalanzaController {
 
         return "redirect:/balanzas/nueva";
     }
+    
+    
+    @GetMapping("/adminSolicitudesPesaje")
+    public String adminSolicitudes(Model model) {
+        // Traer todas las solicitudes de pesaje
+        List<SolicitudPesaje> solicitudes = balanzaService.listarSolicitudes();
+        model.addAttribute("solicitudes", solicitudes);
+
+        return "adminSolicitudesPesaje"; // nombre del template Thymeleaf
+    }
+
 }
