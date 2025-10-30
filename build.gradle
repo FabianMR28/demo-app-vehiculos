@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'  // ✅ versión estable
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.autotech'
+version = '0.0.1-SNAPSHOT'
+description = 'Proyecto AutoTech - Venta de Autos, Bicicletas y Servicios'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Web y plantillas
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    
+    // Persistencia con JPA + MySQL
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.mysql:mysql-connector-j:9.0.0'
+    
+    // Seguridad (login / registro con Spring Security)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    
+    // Validaciones
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Lombok (opcional pero recomendado)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Herramientas de desarrollo
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    //pdf generator
+    implementation 'com.itextpdf:itextpdf:5.5.13.3'
+    
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
