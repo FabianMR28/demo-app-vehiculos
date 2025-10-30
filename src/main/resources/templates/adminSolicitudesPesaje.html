@@ -30,12 +30,18 @@
       <td th:text="${solicitud.tipoVehiculo}"></td>
       <td th:text="${solicitud.observaciones}"></td>
       <td th:text="${solicitud.usuario.nombre}"></td>
-      <td>
-        <form th:action="@{/balanzas/registrar/{id}(id=${solicitud.id})}" method="post">
-          <input type="number" name="peso" placeholder="Peso" step="0.01" required>
-          <button type="submit">Registrar Peso</button>
-        </form>
-      </td>
+		<td>
+		    <form th:action="@{/balanzas/registrar/{id}(id=${solicitud.id})}" method="post" class="d-flex gap-2">
+		        <input type="number" name="peso" placeholder="Peso" step="0.01" required class="form-control form-control-sm">
+		        <button type="submit" class="btn btn-success btn-sm">Registrar</button>
+		    </form>
+		
+		    <a th:href="@{/balanzas/reporte/pdf/{id}(id=${solicitud.id})}"
+		       class="btn btn-danger btn-sm mt-1" target="_blank">
+		        📄 Descargar PDF
+		    </a>
+		</td>
+
     </tr>
   </tbody>
 </table>

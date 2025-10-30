@@ -18,6 +18,6 @@ public interface SolicitudPesajeRepository extends JpaRepository<SolicitudPesaje
            "FROM SolicitudPesaje s")
     List<ReportePesajeDTO> generarReportePesajeDTO();
     
-    List<SolicitudPesaje> findByUsuario(Usuario usuario);
+    List<SolicitudPesaje> findByUsuario	(Usuario usuario);
 	
 }

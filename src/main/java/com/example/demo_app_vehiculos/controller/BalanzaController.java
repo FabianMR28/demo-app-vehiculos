@@ -13,16 +13,27 @@ import java.util.List;
 
 import java.time.LocalDateTime;
 
+import com.example.demo_app_vehiculos.dto.ReportePesajeDTO;
+
+
+import com.example.demo_app_vehiculos.report.ReportePesajePDFGenerator;
+import jakarta.servlet.http.HttpServletResponse;
+
+
 @Controller
 @RequestMapping("/balanzas")
 public class BalanzaController {
 
     private final BalanzaService balanzaService;
     private final UsuarioService usuarioService;
+    private final ReportePesajePDFGenerator reportePDF; // ✅
 
-    public BalanzaController(BalanzaService balanzaService, UsuarioService usuarioService) {
+    public BalanzaController(BalanzaService balanzaService,
+                             UsuarioService usuarioService,
+                             ReportePesajePDFGenerator reportePDF) { // ✅ Inyección aquí
         this.balanzaService = balanzaService;
         this.usuarioService = usuarioService;
+        this.reportePDF = reportePDF;
     }
 
     // 🧩 Mostrar formulario + listar solo solicitudes del usuario logueado
@@ -82,5 +93,51 @@ public class BalanzaController {
 
         return "adminSolicitudesPesaje"; // nombre del template Thymeleaf
     }
+
+    
+    @PostMapping("/registrar/{id}")
+    public String registrarPeso(@PathVariable("id") Long id,
+                                @RequestParam("peso") Double peso) {
+
+        SolicitudPesaje solicitud = balanzaService.buscarPorId(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada con ID: " + id));
+
+        solicitud.setPesoTotal(peso);
+        balanzaService.guardar(solicitud);
+
+        return "redirect:/balanzas/adminSolicitudesPesaje";
+    }
+    
+    @GetMapping("/reporte/pdf")
+    public void generarReporte(HttpServletResponse response) throws Exception {
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=reporte_pesaje.pdf");
+
+        var registros = balanzaService.listarReportePesaje();
+        reportePDF.generarReportePesaje(response.getOutputStream(), registros);
+    }
+    
+    
+    @GetMapping("/reporte/pdf/{id}")
+    public void generarReporteIndividual(@PathVariable("id") Long id, HttpServletResponse response) throws Exception {
+
+        var solicitud = balanzaService.buscarPorId(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+        var registro = List.of(new ReportePesajeDTO(
+                solicitud.getPlacaVehiculo(),
+                solicitud.getTipoVehiculo(),
+                solicitud.getObservaciones(),
+                solicitud.getPesoTotal(),
+                solicitud.getUsuario() != null ? solicitud.getUsuario().getNombre() : "SIN NOMBRE",
+                solicitud.getFechaRegistro()
+        ));
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=pesaje_" + solicitud.getPlacaVehiculo() + ".pdf");
+
+        reportePDF.generarReportePesaje(response.getOutputStream(), registro);
+    }
+
 
 }

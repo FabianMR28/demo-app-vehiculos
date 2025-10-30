@@ -11,11 +11,8 @@ public class ReportePesajeDTO {
     private String nombreUsuario;
     private LocalDateTime fechaRegistro;
 
-    
     public ReportePesajeDTO() {}
 
-    
-    // ⚠️ Constructor que coincide EXACTAMENTE con el @Query
     public ReportePesajeDTO(String placaVehiculo, String tipoVehiculo, String observaciones,
                             Double pesoTotal, String nombreUsuario, LocalDateTime fechaRegistro) {
         this.placaVehiculo = placaVehiculo;
@@ -26,7 +23,7 @@ public class ReportePesajeDTO {
         this.fechaRegistro = fechaRegistro;
     }
 
-    // ----- Getters & Setters -----
+    // Getters y Setters
     public String getPlacaVehiculo() { return placaVehiculo; }
     public void setPlacaVehiculo(String placaVehiculo) { this.placaVehiculo = placaVehiculo; }
 
