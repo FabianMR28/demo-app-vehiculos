@@ -1,5 +1,6 @@
 package com.example.demo_app_vehiculos.service;
 
+import com.example.demo_app_vehiculos.model.Usuario;
 import com.example.demo_app_vehiculos.model.VentaBicicleta;
 import com.example.demo_app_vehiculos.repository.VentaBicicletaRepository;
 import org.springframework.stereotype.Service;
@@ -30,5 +31,10 @@ public class VentaBicicletaService {
 
     public void eliminar(Long id) {
         ventaBicicletaRepository.deleteById(id);
+    }
+
+    // ⭐ NUEVO: Listar ventas de bicicleta por usuario logeado
+    public List<VentaBicicleta> listarPorUsuario(Usuario usuario) {
+        return ventaBicicletaRepository.findByUsuario(usuario);
     }
 }

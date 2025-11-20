@@ -1,5 +1,6 @@
 package com.example.demo_app_vehiculos.service;
 
+import com.example.demo_app_vehiculos.model.Usuario;
 import com.example.demo_app_vehiculos.model.Venta;
 import com.example.demo_app_vehiculos.repository.VentaRepository;
 import org.springframework.stereotype.Service;
@@ -31,5 +32,9 @@ public class VentaService {
     public void eliminar(Long id) {
         ventaRepository.deleteById(id);
     }
-}
 
+    // ⭐ NUEVO: Listar ventas por usuario logeado
+    public List<Venta> listarPorUsuario(Usuario usuario) {
+        return ventaRepository.findByUsuario(usuario);
+    }
+}
