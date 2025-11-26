@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Perfil</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Tus estilos -->
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-5">
+
+    <!-- BOTÓN VOLVER -->
+    <a th:href="@{/}" class="btn btn-secondary mb-3">
+        ← Volver
+    </a>
+
+    <h2>Mi Perfil</h2>
+    <hr>
+
+    <!-- MENSAJES -->
+    <div th:if="${mensaje}" class="alert alert-success" th:text="${mensaje}"></div>
+    <div th:if="${errorPassword}" class="alert alert-danger" th:text="${errorPassword}"></div>
+    <div th:if="${mensajePassword}" class="alert alert-success" th:text="${mensajePassword}"></div>
+
+    <div class="row">
+
+        <!-- FORMULARIO PERFIL -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <strong>Datos del Usuario</strong>
+                </div>
+                <div class="card-body">
+
+                    <form id="formPerfil" method="post" th:action="@{/perfil/actualizar}">
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input class="form-control" name="email"
+                                   th:value="${usuario.email}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input class="form-control" name="nombre"
+                                   th:value="${usuario.nombre}">
+                        </div>
+
+                        <!-- BOTÓN ABRE MODAL -->
+                        <button type="button" class="btn btn-primary w-100"
+                                data-bs-toggle="modal" data-bs-target="#modalConfirmarPerfil">
+                            Guardar Cambios
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULARIO CAMBIAR PASSWORD -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <strong>Cambiar Contraseña</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <form id="formPassword" method="post" th:action="@{/perfil/cambiar-password}">
+                        <div class="mb-3">
+                            <label class="form-label">Contraseña Actual</label>
+                            <input type="password" class="form-control" name="passwordActual" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nueva Contraseña</label>
+                            <input type="password" class="form-control" name="passwordNueva" required>
+                        </div>
+
+                        <!-- BOTÓN ABRE MODAL -->
+                        <button type="button" class="btn btn-warning w-100"
+                                data-bs-toggle="modal" data-bs-target="#modalConfirmarPassword">
+                            Actualizar Contraseña
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- MODAL CONFIRMAR CAMBIOS DE PERFIL -->
+<!-- ===================================================== -->
+<div class="modal fade" id="modalConfirmarPerfil" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar cambios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas actualizar tus datos?
+                <br>Serás deslogueado después del cambio.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="document.getElementById('formPerfil').submit();">
+                    Sí, guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- MODAL CONFIRMAR CAMBIO PASSWORD -->
+<!-- ===================================================== -->
+<div class="modal fade" id="modalConfirmarPassword" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar cambio de contraseña</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ¿Seguro que deseas cambiar tu contraseña?
+                <br>Serás deslogueado después del cambio.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-warning" onclick="document.getElementById('formPassword').submit();">
+                    Sí, cambiar contraseña
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BOOTSTRAP JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

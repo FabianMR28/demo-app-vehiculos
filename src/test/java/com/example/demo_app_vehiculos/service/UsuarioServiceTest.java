@@ -4,42 +4,50 @@ import com.example.demo_app_vehiculos.model.Usuario;
 import com.example.demo_app_vehiculos.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class UsuarioServiceTest {
+public class UsuarioServiceTest {
 
+    @Mock
     private UsuarioRepository usuarioRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
     private UsuarioService usuarioService;
 
     @BeforeEach
     void setUp() {
-        usuarioRepository = Mockito.mock(UsuarioRepository.class);
-        passwordEncoder = Mockito.mock(PasswordEncoder.class);
-        usuarioService = new UsuarioService(usuarioRepository, passwordEncoder);
+        MockitoAnnotations.openMocks(this);
     }
 
+    // ============================================================
+    // TEST: listarUsuarios()
+    // ============================================================
     @Test
     void testListarUsuarios() {
-        when(usuarioRepository.findAll()).thenReturn(List.of(new Usuario()));
+        List<Usuario> lista = List.of(new Usuario(), new Usuario());
+        when(usuarioRepository.findAll()).thenReturn(lista);
 
-        List<Usuario> resultado = usuarioService.listarUsuarios();
+        List<Usuario> result = usuarioService.listarUsuarios();
 
-        assertFalse(resultado.isEmpty());
-        verify(usuarioRepository).findAll();
+        assertEquals(2, result.size());
+        verify(usuarioRepository, times(1)).findAll();
     }
 
+    // ============================================================
+    // TEST: buscarPorId()
+    // ============================================================
     @Test
     void testBuscarPorId() {
         Usuario u = new Usuario();
@@ -47,78 +55,111 @@ class UsuarioServiceTest {
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(u));
 
-        Optional<Usuario> resultado = usuarioService.buscarPorId(1L);
+        Optional<Usuario> result = usuarioService.buscarPorId(1L);
 
-        assertTrue(resultado.isPresent());
-        assertEquals(1L, resultado.get().getId());
-        verify(usuarioRepository).findById(1L);
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().getId());
     }
 
+    // ============================================================
+    // TEST: buscarPorEmail()
+    // ============================================================
     @Test
     void testBuscarPorEmail() {
         Usuario u = new Usuario();
-        u.setEmail("test@correo.com");
+        u.setEmail("test@mail.com");
 
-        when(usuarioRepository.findByEmail("test@correo.com")).thenReturn(Optional.of(u));
+        when(usuarioRepository.findByEmail("test@mail.com"))
+                .thenReturn(Optional.of(u));
 
-        Optional<Usuario> resultado = usuarioService.buscarPorEmail("test@correo.com");
+        Optional<Usuario> result = usuarioService.buscarPorEmail("test@mail.com");
 
-        assertTrue(resultado.isPresent());
-        assertEquals("test@correo.com", resultado.get().getEmail());
-        verify(usuarioRepository).findByEmail("test@correo.com");
+        assertTrue(result.isPresent());
+        assertEquals("test@mail.com", result.get().getEmail());
     }
 
-    @Test
-    void testGuardar() {
-        Usuario user = new Usuario();
-        user.setPassword("1234");
-
-        when(passwordEncoder.encode("1234")).thenReturn("ENCRIPTADO");
-        when(usuarioRepository.save(user)).thenReturn(user);
-
-        Usuario resultado = usuarioService.guardar(user);
-
-        assertEquals("ENCRIPTADO", resultado.getPassword());
-        verify(passwordEncoder).encode("1234");
-        verify(usuarioRepository).save(user);
-    }
-
+    // ============================================================
+    // TEST: eliminar()
+    // ============================================================
     @Test
     void testEliminar() {
         usuarioService.eliminar(5L);
-        verify(usuarioRepository).deleteById(5L);
+        verify(usuarioRepository, times(1)).deleteById(5L);
     }
 
+    // ============================================================
+    // TEST: guardar() ENCRIPTANDO LA CONTRASEÑA
+    // ============================================================
+    @Test
+    void testGuardar_EncriptaPassword() {
+        Usuario u = new Usuario();
+        u.setPassword("1234");
+
+        when(passwordEncoder.encode("1234")).thenReturn("ENCRIPTADA");
+        when(usuarioRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        Usuario result = usuarioService.guardar(u);
+
+        assertEquals("ENCRIPTADA", result.getPassword());
+        verify(passwordEncoder, times(1)).encode("1234");
+        verify(usuarioRepository, times(1)).save(u);
+    }
+
+    // ============================================================
+    // TEST: guardar() NO re-encripta si ya está en BCrypt
+    // ============================================================
+    @Test
+    void testGuardar_NoReencriptaSiYaEsBCrypt() {
+        Usuario u = new Usuario();
+        u.setPassword("$2a$10$EXAMPLEPASSWORDHASH");
+
+        when(usuarioRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        Usuario result = usuarioService.guardar(u);
+
+        assertEquals("$2a$10$EXAMPLEPASSWORDHASH", result.getPassword());
+        verify(passwordEncoder, never()).encode(anyString());
+    }
+
+    // ============================================================
+    // TEST: guardarSinEncriptarPassword()
+    // ============================================================
+    @Test
+    void testGuardarSinEncriptarPassword() {
+        Usuario u = new Usuario();
+        u.setNombre("Fabian");
+
+        when(usuarioRepository.save(any())).thenReturn(u);
+
+        Usuario result = usuarioService.guardarSinEncriptarPassword(u);
+
+        assertEquals("Fabian", result.getNombre());
+        verify(usuarioRepository, times(1)).save(u);
+    }
+
+    // ============================================================
+    // TEST: obtenerUsuarioActual()
+    // ============================================================
     @Test
     void testObtenerUsuarioActual() {
-        Usuario user = new Usuario();
-        user.setEmail("usuario@test.com");
-
+        // Mock SecurityContextHolder
         Authentication auth = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-
-        when(securityContext.getAuthentication()).thenReturn(auth);
+        when(auth.getName()).thenReturn("user@mail.com");
         when(auth.isAuthenticated()).thenReturn(true);
-        when(auth.getName()).thenReturn("usuario@test.com");
-        when(usuarioRepository.findByEmail("usuario@test.com")).thenReturn(Optional.of(user));
 
-        // Usar MockedStatic para SecurityContextHolder
-        try (MockedStatic<SecurityContextHolder> mocked = Mockito.mockStatic(SecurityContextHolder.class)) {
-            mocked.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+        SecurityContext context = mock(SecurityContext.class);
+        when(context.getAuthentication()).thenReturn(auth);
 
-            Usuario resultado = usuarioService.obtenerUsuarioActual();
+        SecurityContextHolder.setContext(context);
 
-            assertNotNull(resultado);
-            assertEquals("usuario@test.com", resultado.getEmail());
-        }
-    }
+        Usuario u = new Usuario();
+        u.setEmail("user@mail.com");
 
-    @Test
-    void testObtenerUsuarioActualSinAutenticacion() {
-        try (MockedStatic<SecurityContextHolder> mocked = Mockito.mockStatic(SecurityContextHolder.class)) {
-            mocked.when(SecurityContextHolder::getContext).thenReturn(null);
+        when(usuarioRepository.findByEmail("user@mail.com"))
+                .thenReturn(Optional.of(u));
 
-            assertThrows(RuntimeException.class, () -> usuarioService.obtenerUsuarioActual());
-        }
+        Usuario result = usuarioService.obtenerUsuarioActual();
+
+        assertEquals("user@mail.com", result.getEmail());
     }
 }

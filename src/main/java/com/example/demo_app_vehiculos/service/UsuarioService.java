@@ -21,6 +21,9 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // ============================================================
+    // LISTAR, BUSCAR, ELIMINAR
+    // ============================================================
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
     }
@@ -33,24 +36,53 @@ public class UsuarioService {
         return usuarioRepository.findByEmail(email);
     }
 
-    public Usuario guardar(Usuario usuario) {
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-        return usuarioRepository.save(usuario);
-    }
-
     public void eliminar(Long id) {
         usuarioRepository.deleteById(id);
     }
 
-    // ✅ NUEVO: obtener el usuario autenticado
+    // ============================================================
+    // GUARDAR con encriptación SEGURA (NO re-encripta)
+    // ============================================================
+    public Usuario guardar(Usuario usuario) {
+
+        // Evitar re-encriptar cuando ya está en BCrypt
+        if (!esPasswordEncriptada(usuario.getPassword())) {
+            usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        }
+
+        return usuarioRepository.save(usuario);
+    }
+
+    // ============================================================
+    // GUARDAR SIN encriptar (para actualizar nombre/email)
+    // ============================================================
+    public Usuario guardarSinEncriptarPassword(Usuario usuario) {
+        return usuarioRepository.save(usuario);
+    }
+
+    // ============================================================
+    // DETECTAR SI UNA CONTRASEÑA YA ESTÁ ENCRIPTADA
+    // ============================================================
+    private boolean esPasswordEncriptada(String password) {
+        return password != null && (
+                password.startsWith("$2a$")
+                || password.startsWith("$2b$")
+                || password.startsWith("$2y$")
+        );
+    }
+
+    // ============================================================
+    // OBTENER USUARIO LOGUEADO
+    // ============================================================
     public Usuario obtenerUsuarioActual() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         if (auth == null || !auth.isAuthenticated()) {
             throw new RuntimeException("No hay un usuario autenticado");
         }
 
-        // Buscar en la BD según el correo (username)
         String email = auth.getName();
+
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
     }
