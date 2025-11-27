@@ -4,25 +4,23 @@ FROM eclipse-temurin:21-jdk-alpine
 # Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiamos los archivos de Gradle necesarios
-COPY build.gradle settings.gradle ./
-COPY gradle ./gradle
-
-# Copiamos el Gradle wrapper y le damos permisos
+# Copiamos Gradle wrapper y le damos permisos de ejecución
 COPY gradlew ./
+COPY gradle ./gradle
 RUN chmod +x gradlew
 
-# Copiamos el código fuente
+# Copiamos archivos de Gradle y código fuente
+COPY build.gradle settings.gradle ./
 COPY src ./src
 
-# Construimos el proyecto usando Gradle wrapper
-RUN ./gradlew build --no-daemon
+# Construimos el proyecto dentro del contenedor
+RUN ./gradlew clean build --no-daemon
 
 # Copiamos el JAR generado a un nombre fijo
 COPY build/libs/*.jar app.jar
 
-# Exponemos el puerto 8080 (solo de referencia; Render usará $PORT)
+# Exponemos puerto de referencia (Render usará $PORT)
 EXPOSE 8080
 
-# Ejecutamos la app usando el puerto que Render asigna
+# Ejecutamos la app usando el puerto asignado por Render
 ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT}"]
