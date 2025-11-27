@@ -8,10 +8,14 @@ WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY gradle ./gradle
 
+# Copiamos el Gradle wrapper y le damos permisos
+COPY gradlew ./
+RUN chmod +x gradlew
+
 # Copiamos el código fuente
 COPY src ./src
 
-# Construimos el proyecto (Gradle wrapper incluido)
+# Construimos el proyecto usando Gradle wrapper
 RUN ./gradlew build --no-daemon
 
 # Copiamos el JAR generado a un nombre fijo
