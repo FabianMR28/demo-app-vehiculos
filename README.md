@@ -86,7 +86,7 @@ El script SQL completo se encuentra dentro del documento del proyecto.
  Instalación y Ejecución
 
 Clonar el repositorio
-```bash
+
 git clone https://github.com/FabianMR28/demo-app-vehiculos.git
 cd demo-app-vehiculos
 2️⃣ Configurar la Base de Datos MySQL
